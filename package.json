@@ -1,6 +1,6 @@
 {
   "name": "tasks-vue-3",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "private": true,
   "description": "Taskbook for Vue 3 Course on learn.javascript.ru",
   "author": "Grigorii K. Shartsev <g.shartsev@javascript.info>",
