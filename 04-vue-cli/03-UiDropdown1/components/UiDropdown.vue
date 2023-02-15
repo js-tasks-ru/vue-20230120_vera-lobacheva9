@@ -15,8 +15,8 @@
       :class="{'dropdown__toggle_icon': anyOptionHasIcon}"
       @click="opened = !opened"
     >
-      <ui-icon v-if="modelValue && getOptionByValue(modelValue)?.icon" :icon="getOptionByValue(modelValue).icon" class="dropdown__icon" />
-      <span>{{ modelValue && getOptionByValue(modelValue)?.text ? getOptionByValue(modelValue)?.text : title }}</span>
+      <ui-icon v-if="modelValue && valueToOption[modelValue]?.icon" :icon="valueToOption[modelValue].icon" class="dropdown__icon" />
+      <span>{{ modelValue && valueToOption[modelValue]?.text ? valueToOption[modelValue]?.text : title }}</span>
     </button>
 
     <div v-if="options.length" class="dropdown__menu" role="listbox" v-show="opened">
@@ -81,9 +81,6 @@ export default {
     selectOption(option) {
       this.$emit('update:modelValue', option.value);
       this.opened = false;
-    },
-    getOptionByValue(value) {
-      return this.valueToOption[value];
     },
   },
 };

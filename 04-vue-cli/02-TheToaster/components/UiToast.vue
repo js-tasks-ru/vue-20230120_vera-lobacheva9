@@ -1,7 +1,7 @@
 <template>
   <div class="toast" 
     :class="'toast_' + kind" 
-    @click="() => this.removeItemCallback && this.removeItemCallback(id)"
+    @click="$emit('remove', id)"
   >
     <ui-icon :icon="$options.icons[kind]" />&nbsp;
     <span><slot /></span>
@@ -25,6 +25,8 @@ export default {
 
   icons,
 
+  emits: ['remove'],
+
   props: {
     id: {
       required: true,
@@ -34,11 +36,6 @@ export default {
       required: true,
       type: String,
       validator: (kind) => kind in icons,
-    },
-    removeItemCallback: {
-      required: false,
-      default: null,
-      type: Function,
     },
   },
 };

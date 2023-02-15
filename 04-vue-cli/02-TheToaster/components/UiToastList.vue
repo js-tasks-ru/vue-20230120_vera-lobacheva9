@@ -5,7 +5,7 @@
       :kind="toast.kind" 
       :key="toast.id"
       :id="toast.id"
-      :removeItemCallback="removeItemCallback"
+      @remove="$emit('remove', toast.id)"
     >
       {{ toast.message }}
     </UiToast>
@@ -27,12 +27,10 @@ export default {
       required: true,
       type: Array,
     },
-    removeItemCallback: {
-      required: false,
-      default: null,
-      type: Function,
-    },
   },
+
+  emits: ['remove'],
+
 };
 </script>
 

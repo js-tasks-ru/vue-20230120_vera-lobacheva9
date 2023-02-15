@@ -1,5 +1,5 @@
 <template>
-  <UiToastList :removeItemCallback="(id) => this.removeToastById(id)" :toasts="toasts" />
+  <UiToastList @remove="removeToast($event)" :toasts="Array.from(toasts.values())" />
 </template>
 
 <script>
@@ -16,34 +16,34 @@ export default {
 
   data: function() {
     return {
-      toasts: [],
+      toasts: new Map(),
     };
   },
 
+  lastId: 0,
+
   methods: {
     error: function(message) {
-      this.pushToast('error', message, 2000);
+      this.pushToast('error', message);
     },
     success: function(message) {
       this.pushToast('success', message);
     },
-    pushToast: function (kind, message, ttl=defaultTtlMs) {
-      const id = Date.now();
-      this.toasts.push({
+    pushToast: function(kind, message, ttl=defaultTtlMs) {
+      const id = this.$options.lastId++;
+      const toast = {
         id,
         kind,
         message,
         ttl,
-      });
+      };
+      this.toasts.set(id, toast);
       setTimeout(() => {
-        this.removeToastById(id);
+        this.removeToast(id);
       }, ttl);
     },
-    removeToastById: function(id) {
-      const index = this.toasts.findIndex((item) => item.id === id);
-      if (index > -1) {
-        this.toasts.splice(index, 1);
-      }
+    removeToast: function(id) {
+      this.toasts.delete(id);
     },
   },
 
