@@ -1,42 +1,58 @@
 <template>
   <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
+    <button type="button" class="agenda-item-form__remove-button" @click="$emit('remove')">
       <UiIcon icon="trash" />
     </button>
 
     <UiFormGroup>
-      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
+      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" v-model="localAgendaItem.type" />
     </UiFormGroup>
 
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <UiFormGroup label="Начало">
-          <UiInput type="time" placeholder="00:00" name="startsAt" />
+          <UiInput type="time" placeholder="00:00" name="startsAt" v-model="localAgendaItem.startsAt" />
         </UiFormGroup>
       </div>
       <div class="agenda-item-form__col">
         <UiFormGroup label="Окончание">
-          <UiInput type="time" placeholder="00:00" name="endsAt" />
+          <UiInput type="time" placeholder="00:00" name="endsAt" v-model="localAgendaItem.endsAt" />
         </UiFormGroup>
       </div>
     </div>
 
-    <UiFormGroup label="Тема">
-      <UiInput name="title" />
-    </UiFormGroup>
-    <UiFormGroup label="Докладчик">
-      <UiInput name="speaker" />
-    </UiFormGroup>
-    <UiFormGroup label="Описание">
-      <UiInput multiline name="description" />
-    </UiFormGroup>
-    <UiFormGroup label="Язык">
-      <UiDropdown title="Язык" :options="$options.talkLanguageOptions" name="language" />
-    </UiFormGroup>
+    <template v-if="localAgendaItem.type === 'talk'">
+      <UiFormGroup label="Тема">
+        <UiInput name="title" v-model="localAgendaItem.title" />
+      </UiFormGroup>
+      <UiFormGroup label="Докладчик">
+        <UiInput name="speaker" v-model="localAgendaItem.speaker" />
+      </UiFormGroup>
+      <UiFormGroup label="Описание">
+        <UiInput multiline name="description" v-model="localAgendaItem.description" />
+      </UiFormGroup>
+      <UiFormGroup label="Язык">
+        <UiDropdown title="Язык" :options="$options.talkLanguageOptions" name="language" v-model="localAgendaItem.language" />
+      </UiFormGroup>
+    </template>
+    <template v-else-if="localAgendaItem.type === 'other'">
+      <UiFormGroup label="Заголовок">
+        <UiInput name="title" v-model="localAgendaItem.title" />
+      </UiFormGroup>
+      <UiFormGroup label="Описание">
+        <UiInput multiline name="description" v-model="localAgendaItem.description" />
+      </UiFormGroup>
+    </template>
+    <template v-else>
+      <UiFormGroup label="Нестандартный текст (необязательно)">
+        <UiInput name="title" v-model="localAgendaItem.title" />
+      </UiFormGroup>
+    </template>
   </fieldset>
 </template>
 
 <script>
+import { klona } from 'klona';
 import UiIcon from './UiIcon.vue';
 import UiFormGroup from './UiFormGroup.vue';
 import UiInput from './UiInput.vue';
@@ -90,6 +106,54 @@ export default {
       required: true,
     },
   },
+
+  data() {
+    return {
+      localAgendaItem: klona(this.agendaItem),
+    };
+  },
+
+  emits: ['update:agendaItem', 'remove'],
+
+  watch: {
+    localAgendaItem: {
+      handler() {
+        this.$emit('update:agendaItem', klona(this.localAgendaItem));
+      },
+      deep: true,
+    },
+    'localAgendaItem.startsAt'(newValue, oldValue) {
+      const currentMinutesDelta = this.hhmmStrToMinutes(this.localAgendaItem.endsAt) - this.hhmmStrToMinutes(oldValue);
+      console.log(
+        currentMinutesDelta,
+        newValue,
+        this.hhmmStrToMinutes(newValue) + currentMinutesDelta
+      );
+      let newEndsAtValue = this.hhmmStrToMinutes(newValue) + currentMinutesDelta;
+      if (newEndsAtValue >= 24 * 60) {
+        newEndsAtValue -= 24 * 60;
+      }
+      this.localAgendaItem.endsAt = this.minutesToHhmmString(newEndsAtValue);
+    },
+  },
+
+  methods: {
+    hhmmStrToMinutes(hhmm) {
+      const hhmmArr = hhmm.split(':').map((item) => +item);
+      return hhmmArr[0] * 60 + hhmmArr[1];
+    },
+    minutesToHhmmString(minutesAll) {
+      const hours = Math.round(minutesAll / 60);
+      const minutes = minutesAll % 60;
+      const hhmmArr = [
+        hours < 10 ? '0' + hours : String(hours),
+        minutes < 10 ? '0' + minutes : String(minutes),
+      ];
+      console.log(hhmmArr.join(':'));
+      return hhmmArr.join(':');
+    },
+  },
+
 };
 </script>
 
