@@ -11,5 +11,10 @@ export default {
       validator: (value) => (Array.isArray(value) ? value.every((item) => isVNode(item)) : isVNode(value)),
     },
   },
+
+  render() {
+    return this.vnode;
+  },
+
 };
 </script>
